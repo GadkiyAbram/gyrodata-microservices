@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   auth-service:
+    container_name: auth-service
     build:
-      context: ./auth-service
+      context: ./services/auth-service
       dockerfile: Dockerfiles/Dockerfile
     depends_on:
       - db-auth
@@ -13,10 +14,10 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=${POSTGRES_HOST}
     volumes:
-      - ./auth-service:/usr/src/auth-service
+      - ./services/auth-service:/usr/src/auth-service
     working_dir: /usr/src/auth-service
     ports:
-      - "${SERVER_EXTERNAL_PORT}:${SERVER_INTERNAL_PORT}"
+      - 8083:8080
 
   db-auth:
     image: postgres:latest
@@ -25,9 +26,24 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  tools-service:
+    container_name: tools-service
+    build:
+      context: ./services/tools-service
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./services/tools-service:/app
+      - ./services/tools-service/gradle:/app/gradle
+      - ./services/tools-service/build:/app/build
+    environment:
+      - DEBUG_PORT=9090
+    ports:
+      - 8084:8080
 
 volumes:
   pgdata:
