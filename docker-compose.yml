@@ -12,6 +12,13 @@ services:
       - auth-service
       - tools-service
 
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/frontend:/usr/src/frontend
+
   auth-service:
     container_name: auth-service
     build:
