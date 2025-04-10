@@ -34,15 +34,15 @@ services:
     volumes:
       - ./services/auth-service:/usr/src/auth-service
     working_dir: /usr/src/auth-service
-#    ports:   // commented out in order not to expose for reaching externally
-#      - 8083:8080
+  #    ports:   // commented out in order not to expose for reaching externally
+  #      - 8083:8080
 
   db-auth:
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: auth
     ports:
       - "5432:5432"
     volumes:
@@ -60,9 +60,40 @@ services:
       - ./services/tools-service/build:/app/build
     environment:
       - DEBUG_PORT=9090
-#    ports:   // commented out in order not to expose for reaching externally
-#      - 8084:8080
+  #    ports:   // commented out in order not to expose for reaching externally
+  #      - 8084:8080
+
+  users-service:
+    container_name: users-service
+    build:
+      context: ./services/users-service
+      dockerfile: Dockerfile
+    depends_on:
+      - db-users
+    environment:
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_HOST=db-users
+    volumes:
+      - ./services/users-service:/usr/src/users-service
+    working_dir: /usr/src/users-service
+    ports:
+      - 8085:8080  # Uncomment if you want to expose it externally
+
+  db-users:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    ports:
+      - "5433:5432"  # Avoid conflict with db-auth
+    volumes:
+      - pgdata-users:/var/lib/postgresql/data
 
 volumes:
   pgdata:
+    driver: local
+  pgdata-users:
     driver: local
