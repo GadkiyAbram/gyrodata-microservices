@@ -63,10 +63,10 @@ services:
   #    ports:   // commented out in order not to expose for reaching externally
   #      - 8084:8080
 
-  users-service:
-    container_name: users-service
+  notification-service:
+    container_name: notification-service
     build:
-      context: ./services/users-service
+      context: ./services/notification-service
       dockerfile: Dockerfile
     depends_on:
       - db-users
@@ -76,24 +76,24 @@ services:
       - POSTGRES_DB=${USER_DB_NAME}
       - POSTGRES_HOST=db-users
     volumes:
-      - ./services/users-service:/usr/src/users-service
-    working_dir: /usr/src/users-service
+      - ./services/notification-service:/usr/src/notification-service
+    working_dir: /usr/src/notification-service
     ports:
       - 8085:8080  # Uncomment if you want to expose it externally
 
-  db-users:
+  db-notification:
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${USER_DB_USER}
-      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
-      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: users
     ports:
-      - "5433:5432"  # Avoid conflict with db-auth
+      - "5433:5432"
     volumes:
-      - pgdata-users:/var/lib/postgresql/data
+      - pgdata-notification:/var/lib/postgresql/data
 
 volumes:
   pgdata:
     driver: local
-  pgdata-users:
+  pgdata-notification:
     driver: local
